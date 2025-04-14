@@ -5,16 +5,23 @@ import Main from "../../components/Main.astro";
 import Heading1 from "../../components/Heading1.astro";
 import Prose from "../../components/Prose.astro";
 import { Image } from "astro:assets";
+import { getEntry } from "astro:content";
+// export const prerender = false;
 
-export async function getStaticPaths() {
-  const posts = await getCollection("posts");
-  return posts.map((post: CollectionEntry<"posts">) => ({
-    params: { slug: post.slug },
-    props: { post },
-  }));
+// export async function getStaticPaths() {
+//   const posts = await getCollection("posts");
+//   return posts.map((post: CollectionEntry<"posts">) => ({
+//     params: { slug: post.slug },
+//     props: { post },
+//   }));
+// }
+
+// const { post } = Astro.props as { post: CollectionEntry<"posts"> };
+const {slug} = Astro.params;
+const post = await getEntry("posts", slug as string);
+if(!post) {
+  return Astro.redirect("/404");
 }
-
-const { post } = Astro.props as { post: CollectionEntry<"posts"> };
 const { Content } = await render(post);
 ---
 
