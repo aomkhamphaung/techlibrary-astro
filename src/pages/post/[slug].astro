@@ -4,6 +4,7 @@ import Layout from "../../layouts/Layout.astro";
 import Main from "../../components/Main.astro";
 import Heading1 from "../../components/Heading1.astro";
 import Prose from "../../components/Prose.astro";
+import { Image } from "astro:assets";
 
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
@@ -20,7 +21,7 @@ const { Content } = await render(post);
 <Layout title={post.data.title}>
   <Main>
     <Heading1 text={post.data.title} />
-    <img
+    <Image
       src={post.data.image}
       width={1024}
       height={1024 / 1.5}
