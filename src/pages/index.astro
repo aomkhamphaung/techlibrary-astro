@@ -2,12 +2,18 @@
 import Layout from '../layouts/Layout.astro';
 import Heading1 from '../components/Heading1.astro';
 import Main from '../components/Main.astro';
+import { getUser, isAuthenticated } from '../lib/workos';
 
-export const prerender = true;
+const authenticated = await isAuthenticated(Astro.cookies);
+const user = await getUser(Astro.cookies);
 ---
 
 <Layout title='Tech Library'>
 	<Main>
-		<Heading1 text="Welcome from TechLibrary!" />
+		{
+			authenticated ?
+			(<Heading1 text=`Welcome ${user?.firstName}!` />) :
+			(<Heading1 text="Welcome from TechLibrary!" />)
+		}
 	</Main>
 </Layout>
