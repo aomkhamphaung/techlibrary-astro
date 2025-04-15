@@ -1,0 +1,11 @@
+---
+import {workos} from "../lib/workos.ts";
+
+const authorizationURL = workos.userManagement.getAuthorizationUrl({
+    provider: "authkit",
+    redirectUri: "http://localhost:4321/api/callback",
+    clientId: import.meta.env.WORKOS_CLIENT_ID
+});
+
+return Astro.redirect(authorizationURL);
+---
