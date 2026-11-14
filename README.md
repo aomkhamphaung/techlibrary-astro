@@ -1,48 +1,74 @@
-# Astro Starter Kit: Basics
+# TechLibrary
 
-```sh
-npm create astro@latest -- --template basics
+A server-rendered blog built with **Astro 5**, with authentication handled by **WorkOS AuthKit**. Anyone can browse the post list; reading a full post requires signing in.
+
+## Features
+
+- **Content collections**: posts are Markdown files with a typed frontmatter schema (Zod), including optimized cover images via `astro:assets`.
+- **SSR on Netlify**: `output: "server"` with the `@astrojs/netlify` adapter; post pages are resolved per request.
+- **WorkOS AuthKit login**: OAuth code flow with an `/api/callback` endpoint that stores a sealed session in an `httpOnly`, `secure`, `SameSite=Lax` cookie.
+- **Route protection with middleware**: `src/middleware.ts` guards every `/post/*` route, refreshes expired sessions transparently, and redirects to `/login` when there's no valid session.
+- **Session-aware UI**: the home page greets signed-in users by name; logout clears the session cookie and ends the WorkOS session.
+- **Tailwind CSS v4** with the Typography plugin for post content.
+
+## Tech stack
+
+| Area | Tools |
+|---|---|
+| Framework | Astro 5 (SSR), TypeScript |
+| Auth | WorkOS AuthKit (`@workos-inc/node`) |
+| Styling | Tailwind CSS v4, `@tailwindcss/typography` |
+| Deployment | Netlify adapter |
+
+## Project structure
+
+```
+src/
+├── content/          # Markdown posts + collection schema
+├── lib/workos.ts     # WorkOS client and session helpers
+├── middleware.ts     # Auth guard for /post/* routes
+├── pages/
+│   ├── index.astro       # Home (session-aware greeting)
+│   ├── blog.astro        # Post list
+│   ├── post/[slug].astro # Single post (protected)
+│   ├── login.astro       # Redirects to WorkOS AuthKit
+│   ├── logout.astro      # Clears session
+│   └── api/callback.astro# OAuth callback, sets sealed session cookie
+├── components/       # Header, PostList, Post, Prose, ...
+└── layouts/          # Base layout
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+## Getting started
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+**Prerequisites:** Node.js 18.17+ and a [WorkOS](https://workos.com) account with AuthKit enabled. In the WorkOS dashboard, add `http://localhost:4321/api/callback` as a redirect URI.
 
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
+```bash
+git clone https://github.com/aomkhamphaung/techlibrary-astro.git
+cd techlibrary-astro
+npm install
+cp .env.example .env   # then fill in your WorkOS values
+npm run dev            # http://localhost:4321
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+### Environment variables
 
-## 🧞 Commands
+| Variable | Description |
+|---|---|
+| `WORKOS_API_KEY` | WorkOS secret API key (`sk_...`) |
+| `WORKOS_CLIENT_ID` | WorkOS client ID (`client_...`) |
+| `WORKOS_COOKIE_PASSWORD` | 32+ character secret used to seal the session cookie |
 
-All commands are run from the root of the project, from a terminal:
+Generate a cookie password with `openssl rand -base64 32`.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+## Scripts
 
-## 👀 Want to learn more?
+| Command | Action |
+|---|---|
+| `npm run dev` | Start the dev server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview the production build |
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## Notes
+
+- Posts in `src/content/posts` are placeholder content.
+- The OAuth redirect URI in `src/pages/login.astro` points to localhost; change it to your deployed URL before deploying.
